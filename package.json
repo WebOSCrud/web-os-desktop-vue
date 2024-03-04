@@ -11,7 +11,7 @@
   "dependencies": {
     "v-contextmenu": "^3.2.0",
     "vue": "^3.4.19",
-    "web-os-api": "file:D:\\workspace\\web-os2\\os-api\\js"
+    "web-os-api": "../web-os-js-api"
   },
   "devDependencies": {
     "@vitejs/plugin-vue": "^5.0.4",

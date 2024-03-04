@@ -22,7 +22,7 @@ import DesktopFileList from "./DesktopFileList.vue";
 import Menu from "./menu/Menu.vue";
 let windows = windowManger.windows;
 
-windowManger.creatWindow({url: "/src/wap/filemanager/index.html", title: 'titke'})
+windowManger.creatWindow({url: "/page/filemanager/index.html", title: 'titke'})
 
 
 </script>
