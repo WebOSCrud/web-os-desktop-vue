@@ -1,22 +1,25 @@
 <template>
   <div class="file-root" ref="fileRoot">
     <div class="file-img">
-      <img draggable="false" width="36" src="/Application.png">
+      <img draggable="false" width="45" :src="api.file.scrUrl.fileIcon(file.path)">
     </div>
     <div class="file-name" v-if="!edit" @click="editFileName">
-      fileNameasdasasdasdasd
+      {{props.file.name}}123132132asdasd
     </div>
-    <textarea v-else @focusout="overInput" @keydown.enter="overInput" @input="input" ref="textarea" class="textarea">
+    <textarea  v-else v-model="fileNameTextareaValue"  @focusout="overInput" @keydown.enter="overInput" @input="input" ref="textarea" class="textarea">
 
     </textarea>
   </div>
 </template>
 <script setup lang="ts">
 import {nextTick, ref} from "vue";
-
+import {FileVo} from "../../../js/vo/vos.ts";
+import {api} from "web-os-api"
 let textarea = ref();
 let fileRoot = ref();
 let edit = ref(false)
+let props=defineProps<{file:FileVo}>()
+let fileNameTextareaValue=ref(props.file.name);
 
 function autoTextareaSize() {
   textarea.value.style.height = "auto";
@@ -29,20 +32,22 @@ function input() {
   autoTextareaSize();
 }
 function overInput(){
-
+  edit.value=false;
+  console.log(fileNameTextareaValue.value)
+  props.file.name=fileNameTextareaValue.value;
 }
 function editFileName() {
   edit.value = true;
   nextTick(() => {
     autoTextareaSize();
+    textarea.value.focus();
   })
-
 }
 </script>
 <style scoped>
 .file-root {
   width: 74px;
-  height: 84px;
+  height: 93px;
   user-select: none;
 }
 

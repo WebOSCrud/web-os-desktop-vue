@@ -1,9 +1,11 @@
 <template>
   <div class="file-list-root" @contextmenu.self="dekstopCcontextmenu">
-    <FileItem @contextmenu="fileContextmenu" class="file-item"></FileItem>
-    <FileItem @contextmenu="fileContextmenu" class="file-item"></FileItem>
-    <FileItem @contextmenu="fileContextmenu" class="file-item"></FileItem>
-    <FileItem @contextmenu="fileContextmenu" class="file-item"></FileItem>
+    <FileItem v-for="file in files" :key="file.path"
+              @contextmenu="fileContextmenu"
+              class="file-item"
+              :file="file"
+    >
+    </FileItem>
   </div>
 </template>
 <script setup lang="ts">
@@ -11,6 +13,11 @@ import FileItem from "./components/FileItem.vue";
 import desktopEnv from "./desktopEnv.ts";
 import fileMenu from "../../js/fileMenu.ts";
 import osApi from 'web-os-api'
+import axiosUtil from "../../js/utile/axiosUtil.ts";
+import {FileVo, ResponseBody} from "../../js/vo/vos.ts";
+import {ref} from "vue";
+
+let files = ref<FileVo[]>([]);
 
 function dekstopCcontextmenu(event: MouseEvent) {
   console.log("contextmenu", event.target)
@@ -47,6 +54,13 @@ function fileContextmenu(event: MouseEvent) {
   }, true);
   desktopEnv.showMenu(menus, event.x + 2, event.y + 2)
 }
+
+axiosUtil.get<FileVo[]>("/desktop/files").then((res:ResponseBody<FileVo[]>) => {
+  console.log(res)
+  files.value = res.data;
+})
+
+
 </script>
 <style scoped>
 .file-list-root {
