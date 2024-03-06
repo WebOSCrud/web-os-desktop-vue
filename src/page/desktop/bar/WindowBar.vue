@@ -1,9 +1,12 @@
 <template>
   <div class="window-bar-root">
-    <div class="window" @click="focusWindow(win)" v-for="win in windows" :key="win.wapWindow.id()">
-      <img height="24" :src="win.wapWindow.icon">
-      <div class="focus" v-show="win.extState.focus"></div>
-    </div>
+    <template v-for="win in windows" :key="win.wapWindow.id()">
+      <div class="window" @click="focusWindow(win)"
+           v-if="win.wapWindow.windowType() == 'normal'">
+        <img height="24" :src="win.wapWindow.icon">
+        <div class="focus" v-show="win.extState.focus"></div>
+      </div>
+    </template>
   </div>
 </template>
 <script setup lang="ts">
@@ -13,8 +16,9 @@ import windowManger, {VueWapWindowState} from "../window/windowManger.ts";
 
 let windows = windowManger.windows;
 
-function focusWindow(win:VueWapWindowState){
+function focusWindow(win: VueWapWindowState) {
   windowManger.focusWindow(win.wapWindow.id());
+
 }
 
 </script>
@@ -32,7 +36,8 @@ function focusWindow(win:VueWapWindowState){
 .window:hover {
   background-color: white;
 }
-.focus{
+
+.focus {
   width: 100%;
   height: 2px;
   background-color: #00a7ff;

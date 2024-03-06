@@ -4,7 +4,8 @@ export interface FileVo{
     path:string
     dir:boolean
     size:number
-    lastModifiedTime:number
+    lastModifiedTime:number,
+    prentPath:string
 }
 
 export interface ResponseBody<T>{

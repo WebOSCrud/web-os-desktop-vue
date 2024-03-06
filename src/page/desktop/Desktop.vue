@@ -1,8 +1,8 @@
 <template>
   <div class="background">
     <Menu></Menu>
-    <div class="desktop-div" >
-      <DesktopFileList ></DesktopFileList>
+    <div class="desktop-div">
+      <DesktopFileList></DesktopFileList>
       <Window v-for="win in windows" v-bind:key="win.wapWindow.id()" :window="win.wapWindow"></Window>
     </div>
     <div class="status-bar">
@@ -10,6 +10,7 @@
       <WindowBar class="window-bar"></WindowBar>
       <TimeBar class="time-bar"></TimeBar>
     </div>
+    <input type="file" id="fileInput" style="display: none;">
   </div>
 </template>
 <script setup lang="ts">
@@ -20,9 +21,13 @@ import WindowBar from "./bar/WindowBar.vue";
 import WindowFillBar from "./bar/WindowFillBar.vue";
 import DesktopFileList from "./DesktopFileList.vue";
 import Menu from "./menu/Menu.vue";
+
 let windows = windowManger.windows;
 
-windowManger.creatWindow({url: "/page/filemanager/index.html", title: 'titke'})
+windowManger.creatWindow({
+  url: "/page/filemanager/index.html", title: 'titke', maximizable: false,
+  maxWidth:400
+})
 
 
 </script>
@@ -49,10 +54,11 @@ windowManger.creatWindow({url: "/page/filemanager/index.html", title: 'titke'})
   overflow: hidden;
 }
 
-.window-fill{
+.window-fill {
   width: 30px;
 }
-.window-bar{
+
+.window-bar {
   flex: 1;
 }
 

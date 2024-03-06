@@ -1,9 +1,10 @@
 <template>
-  <div class="file-list-root" @contextmenu.self="dekstopCcontextmenu">
-    <FileItem v-for="file in files" :key="file.path"
-              @contextmenu="fileContextmenu"
+  <div class="file-list-root" @contextmenu.self="desktopContextmenu">
+    <FileItem v-for="fileType in files" :key="fileType.file.path"
+              @contextmenu="fileContextmenu(fileType,$event)"
+              @dblclick="openFile(fileType)"
               class="file-item"
-              :file="file"
+              :fileType="fileType"
     >
     </FileItem>
   </div>
@@ -16,51 +17,53 @@ import osApi from 'web-os-api'
 import axiosUtil from "../../js/utile/axiosUtil.ts";
 import {FileVo, ResponseBody} from "../../js/vo/vos.ts";
 import {ref} from "vue";
+import {FileVoType} from "../../js/type/type.ts";
+import VoToType from "../../js/type/voToType.ts";
 
-let files = ref<FileVo[]>([]);
+let files = ref<FileVoType[]>([]);
+let desktopFileVo: FileVo;
+axiosUtil.get<FileVo>("/desktop/path").then((res: ResponseBody<FileVo>) => {
+  desktopFileVo = res.data;
+})
 
-function dekstopCcontextmenu(event: MouseEvent) {
+function desktopContextmenu(event: MouseEvent) {
   console.log("contextmenu", event.target)
   event.preventDefault();
-  let menus = fileMenu.creatDirMenu("", {
+  let menus = fileMenu.creatDirMenu({file: desktopFileVo, delete: false, rename: false}, {
     open: () => {
     },
-    refresh: () => {
-    },
-    rename: () => {
-    },
-    delete: () => {
-    },
+    refresh: refreshDesktopFiles,
     paste: () => {
+    },
+    upload(fileVoType) {
+      console.log(fileVoType)
+      files.value.push(fileVoType);
     }
   }, true);
   osApi.showMenu(menus, event);
   // desktopEnv.showMenu(fileMenu.creatDirMenu("",true), event.x, event.y);
 }
 
-function fileContextmenu(event: MouseEvent) {
+function fileContextmenu(fileType: FileVoType, event: MouseEvent) {
   event.preventDefault()
-  let menus = fileMenu.creatDirMenu("", {
-    open: () => {
-    },
-    refresh: () => {
-    },
-    rename: () => {
-    },
-    delete: () => {
-    },
-    paste: () => {
-    }
-  }, true);
+  let menus = fileMenu.creatFileMenu(fileType);
   desktopEnv.showMenu(menus, event.x + 2, event.y + 2)
 }
 
-axiosUtil.get<FileVo[]>("/desktop/files").then((res:ResponseBody<FileVo[]>) => {
-  console.log(res)
-  files.value = res.data;
-})
+function refreshDesktopFiles() {
+  files.value = []
+  axiosUtil.get<FileVo[]>("/desktop/files").then((res: ResponseBody<FileVo[]>) => {
+    console.log(res)
+    let fileVoTypes = VoToType.fileVoToType(res.data);
+    files.value = fileVoTypes;
+  })
+}
 
+function openFile(file: FileVoType) {
+  osApi.openFile(file.file.path);
+}
 
+refreshDesktopFiles();
 </script>
 <style scoped>
 .file-list-root {

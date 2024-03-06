@@ -1,26 +1,27 @@
 <template>
   <v-contextmenu ref="contextmenu">
     <template v-for="menu in menus" :key="menu.label">
-      <v-contextmenu-divider v-if="menu.divider === true"/>
-      <v-contextmenu-submenu v-else-if="menu.suMenu" :disabled="menu.enable=== true ? true:false">
-        <template #title>
-          <Label :icon="menu.icon">{{ menu.label }}</Label>
-        </template>
-        <template #default>
-          <template v-for="subMenu in menu.suMenu" :key="subMenu.label">
-            <v-contextmenu-divider v-if="subMenu.divider === true"/>
-            <v-contextmenu-item v-else @click="clickMenuItem(subMenu)"
-                                :disabled="subMenu.enable=== true ? true:false">
-              <Label :icon="subMenu.icon">{{ subMenu.label }}</Label>
-            </v-contextmenu-item>
+      <template v-if="menu.show === false ? false:true">
+        <v-contextmenu-divider v-if="menu.divider === true"/>
+        <v-contextmenu-submenu v-else-if="menu.suMenu" :disabled="menu.enable=== true ? true:false">
+          <template #title>
+            <Label :icon="menu.icon">{{ menu.label }} {{ menu.show === false }}</Label>
           </template>
-        </template>
-      </v-contextmenu-submenu>
-      <v-contextmenu-item v-else @click="clickMenuItem(menu)"
-                          :disabled="menu.enable=== true ? true:false">
-        <Label :icon="menu.icon">{{ menu.label }}</Label>
-      </v-contextmenu-item>
-
+          <template #default>
+            <template v-for="subMenu in menu.suMenu" :key="subMenu.label">
+              <v-contextmenu-divider v-if="subMenu.divider === true"/>
+              <v-contextmenu-item v-else @click="clickMenuItem(subMenu)"
+                                  :disabled="subMenu.enable=== true ? true:false">
+                <Label :icon="subMenu.icon">{{ subMenu.label }}</Label>
+              </v-contextmenu-item>
+            </template>
+          </template>
+        </v-contextmenu-submenu>
+        <v-contextmenu-item v-else @click="clickMenuItem(menu)"
+                            :disabled="menu.enable=== true ? true:false">
+          <Label :icon="menu.icon">{{ menu.label }} {{ }}</Label>
+        </v-contextmenu-item>
+      </template>
     </template>
 
   </v-contextmenu>
@@ -41,7 +42,7 @@ let menus = ref([] as Menu[]);
 function show(menu: Menu[], x: number, y: number) {
   menus.value = menu;
   //@ts-ignore
-  contextmenu.value.show({top: y+2, left: x+2});
+  contextmenu.value.show({top: y + 2, left: x + 2});
 }
 
 window.addEventListener("mousedown", (evt: MouseEvent) => {

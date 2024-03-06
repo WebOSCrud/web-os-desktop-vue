@@ -1,25 +1,39 @@
 <template>
-  <div class="file-root" ref="fileRoot">
-    <div class="file-img">
-      <img draggable="false" width="45" :src="api.file.scrUrl.fileIcon(file.path)">
+    <div class="file-root" ref="fileRoot">
+      <template v-if="!fileType.delete">
+        <div class="file-img">
+          <div v-if="fileType.delete" style="width: 45px;height: 45px"></div>
+          <img v-else draggable="false" width="45" height="45" :src="api.file.scrUrl.fileIcon(fileType.file.path)">
+        </div>
+        <div class="file-name" v-if="!fileType.rename">
+          {{ props.fileType.file.name }}
+        </div>
+        <textarea v-else v-model="fileNameTextareaValue" @focusout="overInput" @keydown.enter="overInput" @input="input"
+                  ref="textarea" class="textarea">
+      </textarea>
+      </template>
     </div>
-    <div class="file-name" v-if="!edit" @click="editFileName">
-      {{props.file.name}}123132132asdasd
-    </div>
-    <textarea  v-else v-model="fileNameTextareaValue"  @focusout="overInput" @keydown.enter="overInput" @input="input" ref="textarea" class="textarea">
-
-    </textarea>
-  </div>
 </template>
 <script setup lang="ts">
-import {nextTick, ref} from "vue";
-import {FileVo} from "../../../js/vo/vos.ts";
+import {nextTick, ref, watch} from "vue";
 import {api} from "web-os-api"
+import {FileVoType} from "../../../js/type/type.ts";
+import axiosUtil from "../../../js/utile/axiosUtil.ts";
+import {FileVo, ResponseBody} from "../../../js/vo/vos.ts";
+
 let textarea = ref();
 let fileRoot = ref();
-let edit = ref(false)
-let props=defineProps<{file:FileVo}>()
-let fileNameTextareaValue=ref(props.file.name);
+let props = defineProps<{ fileType: FileVoType }>()
+
+let fileNameTextareaValue = ref(props.fileType.file.name);
+
+watch(() => {
+  return props.fileType.rename
+}, (newValue) => {
+  if (newValue === true) {
+    editFileName();
+  }
+})
 
 function autoTextareaSize() {
   textarea.value.style.height = "auto";
@@ -31,13 +45,27 @@ function autoTextareaSize() {
 function input() {
   autoTextareaSize();
 }
-function overInput(){
-  edit.value=false;
+
+function overInput() {
+  props.fileType.rename = false;
   console.log(fileNameTextareaValue.value)
-  props.file.name=fileNameTextareaValue.value;
+  let oldName = props.fileType.file.name;
+  if (oldName === fileNameTextareaValue.value) {
+    return
+  }
+  props.fileType.file.name = fileNameTextareaValue.value;
+  axiosUtil.post<FileVo>("/files/rename", {
+    newName: fileNameTextareaValue.value,
+    oldPath: props.fileType.file.path,
+  }).then((res: ResponseBody<FileVo>) => {
+    props.fileType.file.name = res.data.name;
+    props.fileType.file.path = res.data.path;
+  }).catch(() => {
+    props.fileType.file.name = oldName;
+  })
 }
+
 function editFileName() {
-  edit.value = true;
   nextTick(() => {
     autoTextareaSize();
     textarea.value.focus();
@@ -49,6 +77,7 @@ function editFileName() {
   width: 74px;
   height: 93px;
   user-select: none;
+  padding-top: 3px;
 }
 
 .file-img {
