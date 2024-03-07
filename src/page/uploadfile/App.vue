@@ -36,11 +36,15 @@ onMounted(() => {
       let total = progressEvent.total as number;
       let persent = (progressEvent.loaded / total * 100 | 0)		//上传进度百分比
       console.log(persent)
+      if (persent >= 99) {
+        persent = 99;
+      }
       progress.value = persent;
     },
   }).then((res: AxiosResponse<ResponseBody<FileVo>>) => {
     console.log(res)
     close = true;
+    progress.value = 100;
     osApi.currentWindow().pushEvent("upload", new WindowEvent(res.data.data));
     setTimeout(() => {
       osApi.currentWindow().close()
@@ -59,16 +63,17 @@ osApi.currentWindow().addEventListener("close", (event: WindowEvent) => {
   if (close) {
     return
   }
+  //阻止默认事件操作
+  event.preventDefault();
+
   //是否可以关闭
-  osApi.messageBox({msg: "是否取消上传"}, (confirm: boolean) => {
-    console.log("是否取消上传:"+confirm)
+  osApi.messageBox({type: 'info', msg: "是否取消上传"}).then(confirm => {
+    console.log("是否取消上传:" + confirm)
     if (confirm) {
       close = true;
       osApi.currentWindow().close();
     }
-  });
-  //阻止默认事件操作
-  event.preventDefault();
+  })
 })
 
 </script>
@@ -76,7 +81,8 @@ osApi.currentWindow().addEventListener("close", (event: WindowEvent) => {
 .app-root {
   padding: 5px;
 }
-.file-name{
+
+.file-name {
   width: 100%;
   white-space: nowrap; /* 防止文本换行 */
   overflow: hidden; /* 隐藏溢出的文本 */

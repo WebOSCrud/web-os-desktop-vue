@@ -1,6 +1,7 @@
 <template>
   <div class="background">
     <Menu></Menu>
+    <MessageBox ></MessageBox>
     <div class="desktop-div">
       <DesktopFileList></DesktopFileList>
       <Window v-for="win in windows" v-bind:key="win.wapWindow.id()" :window="win.wapWindow"></Window>
@@ -21,6 +22,7 @@ import WindowBar from "./bar/WindowBar.vue";
 import WindowFillBar from "./bar/WindowFillBar.vue";
 import DesktopFileList from "./DesktopFileList.vue";
 import Menu from "./menu/Menu.vue";
+import MessageBox from "./mesage/MessageBox.vue";
 
 let windows = windowManger.windows;
 
@@ -44,6 +46,7 @@ windowManger.creatWindow({
   padding-left: 5px;
   display: flex;
   background-color: rgba(243, 243, 243, .85);
+  user-select: none;
 }
 
 .background {
@@ -60,6 +63,10 @@ windowManger.creatWindow({
 
 .window-bar {
   flex: 1;
+}
+.time-bar{
+  user-select: none;
+  width: 80px;
 }
 
 </style>
