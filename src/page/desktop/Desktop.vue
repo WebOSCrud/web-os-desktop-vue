@@ -27,8 +27,8 @@ import MessageBox from "./mesage/MessageBox.vue";
 let windows = windowManger.windows;
 
 windowManger.creatWindow({
-  url: "/page/filemanager/index.html", title: 'titke', maximizable: false,
-  maxWidth:400
+  url: "/page/filemanager/index.html", title: 'titke',
+  width:600,height:400
 })
 
 

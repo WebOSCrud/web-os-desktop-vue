@@ -38,10 +38,12 @@ function desktopContextmenu(event: MouseEvent) {
     upload(fileVoType) {
       console.log(fileVoType)
       files.value.push(fileVoType);
+    },
+    newFile(fileVoType:FileVoType){
+      files.value.push(fileVoType);
     }
   }, true);
   osApi.showMenu(menus, event);
-  // desktopEnv.showMenu(fileMenu.creatDirMenu("",true), event.x, event.y);
 }
 
 function fileContextmenu(fileType: FileVoType, event: MouseEvent) {

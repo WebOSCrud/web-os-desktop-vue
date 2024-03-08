@@ -1,0 +1,20 @@
+<template>
+  <svg t="1709887192123" class="icon" viewBox="0 0 1024 1024" version="1.1" xmlns="http://www.w3.org/2000/svg"
+       p-id="75810" :width="presets.size" :height="presets.size">
+    <path d="M428.6 924.2L96 619.5l67.8-74L328.2 696V110.3h100.4z"
+          fill="#333333" p-id="75811"></path>
+    <path d="M695.8 913.7H595.4V99.8L928 404.5l-67.8 74L695.8 328z"
+          fill="#1296db" p-id="75811"></path>
+  </svg>
+</template>
+<script setup lang="ts">
+import presets from "./presets.ts"
+
+let props = defineProps<{
+  active: boolean
+}>()
+console.log(props)
+</script>
+<style scoped>
+
+</style>

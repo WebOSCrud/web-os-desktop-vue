@@ -1,4 +1,4 @@
-import {Menu, WindowEvent} from "web-os-api"
+import {ContextMenu, WindowEvent} from "web-os-api"
 import osApi from "web-os-api"
 import axiosUtil from "./utile/axiosUtil.ts";
 import {FileVo, ResponseBody} from "./vo/vos.ts";
@@ -12,6 +12,7 @@ interface DirMenuCallback {
     paste: (filePath: string) => void;
     refresh: (filePath: string) => void;
     upload: (fileVoType: FileVoType) => void;
+    newFile: (fileVoType: FileVoType) => void;
 }
 
 
@@ -54,57 +55,16 @@ function uploadFile(dir: FileVo, menuCallback: DirMenuCallback) {
     fileInput.click();
 }
 
-function creatFileMenu(fileVo: FileVoType): Menu[] {
+function creatFileMenu(fileVo: FileVoType): ContextMenu {
     let filePath = fileVo.file.path;
-    return [{
-        label: "打开",
-        click: () => {
-            osApi.openFile(filePath)
-        }
-    }, {
-        label: "打开方式",
-        click: () => {
-        }
-    }, {
-        label: '',
-        divider: true
-    }, {
-        label: "删除",
-        click: () => {
-            deleteFile(fileVo)
-        }
-    }, {
-        label: "复制",
-        click: () => {
-            osApi.fileClipboard().type = 'copy'
-            osApi.fileClipboard().data = fileVo.file;
-        }
-    }, {
-        label: "剪切",
-        click: () => {
-            osApi.fileClipboard().type = 'cut'
-            osApi.fileClipboard().data = fileVo.file;
-        }
-    }, {
-        label: '',
-        divider: true
-    }, {
-        label: "上传文件",
-        enable: true,
-    }, {
-        label: "下载"
-    }, {
-        label: '',
-        divider: true
-    }, {
-        label: '重命名',
-        click: () => {
-            fileVo.rename = true;
-        }
-    }]
+    console.log(filePath);
+    return {
+        group:[],
+        menus:[]
+    }
 }
 
-function creatDirMenu(fileVo: FileVoType, menuCallback: DirMenuCallback, desktop = false): Menu[] {
+function creatDirMenu(fileVo: FileVoType, menuCallback: DirMenuCallback, desktop = false): ContextMenu {
     let filePath = fileVo.file.path;
     console.log(filePath)
     let isPaste = osApi.fileClipboard().type != null
@@ -114,75 +74,12 @@ function creatDirMenu(fileVo: FileVoType, menuCallback: DirMenuCallback, desktop
             isPaste = false;
         }
     }
-    let menus: Menu[] = [
-        {
-            label: "刷新",
-            click: () => {
-                console.log("refresh")
-                menuCallback.refresh(filePath);
-            }
-        }, {
-            label: "打开",
-            show: !desktop,
-            click: () => {
-                menuCallback.open(filePath);
-            }
-        }, {
-            label: '',
-            divider: true,
-            show: !desktop,
-        }, {
-            label: "删除",
-            show: !desktop,
-            click() {
-                deleteFile(fileVo);
-            },
-        }, {
-            label: "复制",
-            show: !desktop,
-            click: () => {
-                osApi.fileClipboard().type = 'copy'
-                osApi.fileClipboard().data = fileVo.file;
-            },
-        }, {
-            label: "剪切",
-            show: !desktop,
-            click: () => {
-                osApi.fileClipboard().type = 'cut'
-                osApi.fileClipboard().data = fileVo.file;
-            },
-        }, {
-            label: '',
-            divider: true
-        }, {
-            label: "粘贴",
-            enable: !isPaste,
-            click: () => {
-                menuCallback.paste(filePath)
-            }
-        }, {
-            label: '',
-            divider: true
-        }, {
-            label: "上传文件",
-            click() {
-                uploadFile(fileVo.file, menuCallback)
-            },
-        }, {
-            label: "打包下载",
-            show: !desktop
-        }, {
-            label: '',
-            divider: true
-        }, {
-            label: '重命名',
-            show: !desktop,
-            click: () => {
-                fileVo.rename = true
-            }
-        }]
     console.log(desktop)
-    return menus;
+    console.log(menuCallback)
+    return {
+        group:[],
+        menus:[]
+    };
 }
 
 

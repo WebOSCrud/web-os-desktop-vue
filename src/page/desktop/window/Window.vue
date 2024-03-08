@@ -248,20 +248,21 @@ function endMoveWindow() {
 }
 
 .title-tool {
-  height: 25px;
+  height: 35px;
   width: 100%;
 }
 
 .content {
-  height: calc(100% - 25px);
+  height: calc(100% - 35px);
   position: relative;
   user-select: none;
 }
 
 .iframe {
-  width: 100%;
-  height: 100%;
+  width: calc(100% - 4px);
+  height: calc(100% - 5px);
   position: absolute;
+  left: 2px;
 }
 
 .iframe-mask {
@@ -326,10 +327,12 @@ function endMoveWindow() {
 .tool-item {
   width: 40px;
   text-align: center;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
-
-.tool-item img {
-  margin-top: 4px;
+.tool .close{
+  border-top-right-radius: 10px;
 }
 
 .tool .close:hover {
