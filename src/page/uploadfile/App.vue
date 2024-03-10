@@ -13,8 +13,10 @@ import {AxiosError, AxiosProgressEvent, AxiosResponse} from "axios";
 import Progress from "../../components/Progress.vue";
 import {onMounted, ref} from "vue";
 
+console.log("？？？？？？？？？")
 let args = osApi.currentWindow().args() as { dir: FileVo, file: File };
 console.log(args)
+
 let file = args.file;
 let progress = ref(0);
 

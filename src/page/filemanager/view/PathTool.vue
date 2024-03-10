@@ -18,40 +18,62 @@
     <div v-show="!showPathInput" class="nav-pc" @click="checkNavItemDiv">
       <img style="position: relative;top:1px" src="/filemanager/pc.png" height="18" width="18"/>
     </div>
-    <div v-show="!showPathInput" @click="inputPath" ref="pathInputDiv" class="path-input">
-      <div ref="navItemDiv" class="nav-item-div" :style="navItemStyle">
-        <template v-for="i in 2">
+    <div v-show="!showPathInput" ref="pathInputDiv" @click.self="inputPath" class="path-input">
+      <div ref="navItemDiv" @click.self="inputPath" class="nav-item-div" :style="navItemStyle">
+        <template v-for="navPath in navPaths">
           <div class="nav-item">
             >
           </div>
-          <div class="nav-item">
-            D:\{{ i }}
+          <div @click="clickPathNav(navPath)" class="nav-item">
+            {{ navPath.name }}
           </div>
         </template>
       </div>
     </div>
     <div v-show="showPathInput" class="input-div">
-      <input @focusout="inputFocusout">
+      <input ref="pathInput" v-model="pathInputValue" @keydown.enter="inputEnter" @focusout="inputFocusout">
       <div class="input-down-line"></div>
     </div>
   </div>
 </template>
 <script setup lang="ts">
-import {onMounted, ref} from "vue";
+import {nextTick, onMounted, ref} from "vue";
+import nav, {PathNav} from "../nav.ts"
+import axiosUtil from "../../../js/utile/axiosUtil.ts";
+import {ResponseBody} from "../../../js/vo/vos.ts";
 
 let pathInputDiv = ref<HTMLDivElement>();
 let navItemDiv = ref<HTMLDivElement>();
 let showPathInput = ref(false);
+let navPaths = nav.pathNavRef;
+let pathInputValue = ref("");
 let navItemStyle = ref({
   left: 0 + 'px',
 })
 
+let pathInput = ref<HTMLDivElement>();
+
 function inputPath() {
   showPathInput.value = true;
+  pathInputValue.value = nav.lastPathNav().path;
+  nextTick(() => {
+    pathInput.value?.focus()
+  })
 }
-function inputFocusout(){
+
+function inputEnter() {
   showPathInput.value = false;
 }
+
+function inputFocusout() {
+  showPathInput.value = false;
+  axiosUtil.post<PathNav[]>("/files/path/nav", {
+    path: pathInputValue.value
+  }).then(((res: ResponseBody<PathNav[]>) => {
+    nav.setPathNav(res.data);
+  }))
+}
+
 function checkNavItemDiv() {
   //@ts-ignore
   let pathInputDivRect = pathInputDiv.value.getBoundingClientRect();
@@ -65,10 +87,30 @@ function checkNavItemDiv() {
   }
 }
 
+function clickPathNav(pathNav: PathNav) {
+  if (pathNav == nav.lastPathNav()) {
+    return
+  }
+  let newPathNav = [];
+  for (let i = 0; i < navPaths.value.length; i++) {
+    if (navPaths.value[i] == pathNav) {
+      newPathNav.push(navPaths.value[i])
+      break
+    }
+    newPathNav.push(navPaths.value[i])
+  }
+  nav.setPathNav(newPathNav);
+}
+
 window.addEventListener("resize", checkNavItemDiv)
 
 onMounted(() => {
   checkNavItemDiv();
+  nav.addEventListener(()=>{
+    nextTick(()=>{
+      checkNavItemDiv();
+    })
+  })
 })
 </script>
 <style scoped>
@@ -129,6 +171,7 @@ onMounted(() => {
   align-items: center;
   border-radius: 5px;
   position: relative;
+  white-space: nowrap;
 }
 
 .nav-item:hover {
@@ -149,7 +192,8 @@ onMounted(() => {
   font-size: 18px;
   height: 30px;
 }
-.input-down-line{
+
+.input-down-line {
   height: 3px;
   width: 100%;
   background-color: #0067c0;

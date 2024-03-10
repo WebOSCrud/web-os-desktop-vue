@@ -22,14 +22,21 @@ import VoToType from "../../js/type/voToType.ts";
 
 let files = ref<FileVoType[]>([]);
 let desktopFileVo: FileVo;
+
 axiosUtil.get<FileVo>("/desktop/path").then((res: ResponseBody<FileVo>) => {
   desktopFileVo = res.data;
+  refreshDesktopFiles();
 })
 
 function desktopContextmenu(event: MouseEvent) {
   console.log("contextmenu", event.target)
   event.preventDefault();
-  let menus = fileMenu.creatDirMenu({file: desktopFileVo, delete: false, rename: false}, {
+  let menus = fileMenu.creatDirMenu({
+    file: desktopFileVo,
+    delete: false,
+    rename: false,
+    select: false
+  }, {
     open: () => {
     },
     refresh: refreshDesktopFiles,
@@ -39,10 +46,10 @@ function desktopContextmenu(event: MouseEvent) {
       console.log(fileVoType)
       files.value.push(fileVoType);
     },
-    newFile(fileVoType:FileVoType){
+    newFile(fileVoType: FileVoType) {
       files.value.push(fileVoType);
     }
-  }, true);
+  }, true, true);
   osApi.showMenu(menus, event);
 }
 
@@ -54,7 +61,9 @@ function fileContextmenu(fileType: FileVoType, event: MouseEvent) {
 
 function refreshDesktopFiles() {
   files.value = []
-  axiosUtil.get<FileVo[]>("/desktop/files").then((res: ResponseBody<FileVo[]>) => {
+  axiosUtil.post<FileVo[]>("/files/list", {
+    path: desktopFileVo.path
+  }).then((res: ResponseBody<FileVo[]>) => {
     console.log(res)
     let fileVoTypes = VoToType.fileVoToType(res.data);
     files.value = fileVoTypes;
@@ -65,14 +74,13 @@ function openFile(file: FileVoType) {
   osApi.openFile(file.file.path);
 }
 
-refreshDesktopFiles();
 </script>
 <style scoped>
 .file-list-root {
   width: 100%;
   height: 100%;
   display: flex;
-  flex-wrap:  wrap;
+  flex-wrap: wrap;
   align-content: flex-start;
 }
 

@@ -1,7 +1,8 @@
 import {FileVo} from "../vo/vos.ts";
 
-export interface FileVoType{
-    file:FileVo,
-    rename:boolean,
-    delete:boolean,
+export interface FileVoType {
+    file: FileVo,
+    rename: boolean,
+    delete: boolean,
+    select: boolean,
 }

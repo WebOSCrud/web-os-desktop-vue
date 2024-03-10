@@ -1,34 +1,57 @@
-
-
 <template>
   <div class="icon-view-root">
-    <FileItem class="file-item" :file-type="item" v-for="item in files"></FileItem>
+    <FileItem @dblclick="openFile(item)" @click="selectFile(item,index)"
+              :class="{'file-item':true,'file-item-select':item.select}"
+              :file-type="item" v-for="(item,index) in files"></FileItem>
   </div>
 </template>
 <script setup lang="ts">
- import {ref} from "vue";
- import {FileVoType} from "../../../../js/type/type.ts";
- import FileItem from "../../../desktop/components/FileItem.vue";
+import {onMounted, onUnmounted, ref} from "vue";
+import {FileVoType} from "../../../../js/type/type.ts";
+import FileItem from "../../../desktop/components/FileItem.vue";
+import nav, {PathNav} from "../../nav.ts";
+import axiosUtil from "../../../../js/utile/axiosUtil.ts";
+import {FileVo, ResponseBody} from "../../../../js/vo/vos.ts";
+import voToType from "../../../../js/type/voToType.ts";
+import footer from "../../footer.ts";
+import fileSelector from "../../fileSelector.ts";
 
- let files=ref<FileVoType[]>([]);
+let files = ref<FileVoType[]>([]);
 
- for (let i = 0; i < 100; i++) {
-   files.value.push({
-     file:{
-       name:"file",
-       path:"D:\\web-os2\\web-os-desktop\\gradle",
-       prentPath:"",
-       dir:false,
-       size:12,
-       lastModifiedTime:12
-     },
-     delete:false,
-     rename:false
-   })
- }
+function pathNavChange(pathNav: PathNav) {
+  if (pathNav.path == "") {
+    return;
+  }
+  files.value = [];
+  axiosUtil.post<FileVo[]>("/files/list", {
+    path: pathNav.path
+  }).then((res: ResponseBody<FileVo[]>) => {
+    let fileVoTypes = voToType.fileVoToType(res.data);
+    files.value = fileVoTypes;
+    footer.label.value = res.data.length + "个项目"
+  })
+}
+
+function openFile(file: FileVoType) {
+  if (file.file.dir) {
+    nav.pushPathNav({name: file.file.name, path: file.file.path})
+  }
+}
+function selectFile(file:FileVoType,index:number){
+  fileSelector.setSelectFile([file]);
+  console.log(index);
+}
+onMounted(() => {
+  pathNavChange(nav.pathNavRef.value[nav.pathNavRef.value.length - 1])
+  nav.addEventListener(pathNavChange);
+})
+onUnmounted(() => {
+  nav.removeEventListener(pathNavChange);
+})
+
 </script>
 <style scoped>
-.icon-view-root{
+.icon-view-root {
   width: 100%;
   height: 100%;
   display: flex;
@@ -36,13 +59,18 @@
   align-content: flex-start;
   overflow: auto;
 }
-.file-item{
+
+.file-item {
   margin: 3px;
 }
-.icon-view-root >>> .file-name{
+
+.icon-view-root >>> .file-name {
   color: black;
 }
-.file-item:hover{
+.file-item-select{
+  background-color: rgba(70, 160, 252, 0.3);
+}
+.file-item:hover {
   background-color: rgba(70, 160, 252, 0.3);
 }
 </style>

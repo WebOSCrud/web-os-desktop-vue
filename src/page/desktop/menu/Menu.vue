@@ -2,59 +2,40 @@
   <teleport to="body">
     <div menu-div="true" ref="mainMenuHtml" v-show="showMenuRef" :style="mainMenuStyle"
          class="menu-base contextMenu-root">
-      <div style="height: 7px"></div>
-      <div class="menu-group">
-        <div class="menu-group-item" title="重命">
-          <img width="20" src="/filemanager/file/rename-active.svg">
-        </div>
-        <div class="menu-group-item">
-          <img width="20" src="/filemanager/file/rename-active.svg">
-        </div>
-        <div class="menu-group-item">
-          <img width="20" src="/filemanager/file/rename-active.svg">
-        </div>
-        <div class="menu-group-item">
-          <img width="20" src="/filemanager/file/rename-active.svg">
+      <!--      <div style="height: 7px"></div>-->
+      <div class="menu-group" v-if="contextMenu.group.length>0">
+        <div @click="clickMenuGroupItem(groupItem)" v-for="groupItem in contextMenu.group" class="menu-group-item"
+             :title="groupItem.tip">
+          <img :src="groupItem.icon">
         </div>
       </div>
-      <div class="menu-item">
-        <Label :textSpace="10" icon="/filemanager/file/rename-active.svg"
-               @mouseenter="showSubMenu($event,false)">菜单1</Label>
-        <!--        <img src="/filemanager/file/rename-active.svg">-->
-      </div>
-      <div class="menu-divider"></div>
-      <div class="menu-item" @mouseenter="showSubMenu($event,false)">
-        <Label :textSpace="10" icon="/filemanager/file/rename-active.svg">菜单11212312121212阿达</Label>
-        <!--        <img src="/filemanager/file/rename-active.svg">-->
-      </div>
-      <div class="menu-item" @mouseenter="showSubMenu($event)">
-        <Label :textSpace="10" icon="/filemanager/file/rename-active.svg">菜单</Label>
-        <img src="/filemanager/file/rename-active.svg">
-      </div>
-      <div class="menu-divider"></div>
-      <div class="menu-item" @mouseenter="showSubMenu($event)">
-        <Label :textSpace="10" icon="/filemanager/file/rename-active.svg">菜单</Label>
-        <img src="/filemanager/file/rename-active.svg">
-      </div>
-      <div class="menu-item" @mouseenter="showSubMenu($event)">
-        <Label :textSpace="10" icon="/filemanager/file/rename-active.svg">菜单</Label>
-        <img src="/filemanager/file/rename-active.svg">
-      </div>
+      <template v-for="menu in contextMenu.menus">
+        <div class="menu-divider" v-if="menu.divider==true"></div>
+        <div :class="{'menu-item':true,
+        'disabled':menu.enable===false,
+        'menu-item-hover':menu.enable!==false
+        }" @click="clickMenuItem(menu)" @mouseenter="showSubMenu($event,menu)" v-else-if="menu.show!==false">
+          <Label :icon-size="20" :textSpace="10" :icon="menu.icon"
+                 >{{ menu.label }}</Label>
+          <img style="" v-if="menu.subMenu && menu.subMenu.length>0"
+               src="/filemanager/min-arrow.svg">
+        </div>
+      </template>
+
     </div>
   </teleport>
   <teleport to="body">
     <div menu-div="true" ref="subMenuHtml" :style="subMenuStyle" v-show="showSubMenuRef"
          class="menu-base sub-contextMenu-root">
-      <div class="menu-item">
-        <Label :textSpace="10" icon="/filemanager/file/rename-active.svg">菜单</Label>
-      </div>
-      <div class="menu-divider"></div>
-      <div class="menu-item">
-        <Label :textSpace="10" icon="/filemanager/file/rename-active.svg">菜单</Label>
-      </div>
-      <div class="menu-item">
-        <Label :textSpace="10" icon="/filemanager/file/rename-active.svg">菜单</Label>
-      </div>
+      <template v-for="menu in contextSubMenu">
+        <div class="menu-divider" v-if="menu.divider==true && menu.show!==false"></div>
+        <div :class="{'menu-item':true,
+        'disabled':menu.enable===false,
+        'menu-item-hover':menu.enable!==false
+        }" v-if="menu.divider!==true && menu.show!==false">
+          <Label :textSpace="10" :icon="menu.icon">{{ menu.label }}</Label>
+        </div>
+      </template>
     </div>
   </teleport>
 </template>
@@ -63,13 +44,16 @@ import {
   ref, reactive, nextTick
 } from "vue";
 import menuContent from "./menuContent.ts";
-import {ContextMenu, Menu} from "web-os-api";
+import {ContextMenu, GroupMenu, SubMenu} from "web-os-api";
 import Label from "../../../components/Label.vue";
+import {Menu} from "web-os-api";
 
 let showMenuRef = ref(false);
 let showSubMenuRef = ref(false);
-let showSubMenuCount=0;
-let contextMenu = ref([] as ContextMenu[]);
+let showSubMenuCount = 0;
+let contextMenu = ref<ContextMenu>({group: [], menus: []});
+let contextSubMenu = ref<SubMenu[]>([]);
+
 let mainMenuHtml = ref();
 let subMenuHtml = ref();
 let mainMenuStyle = reactive({
@@ -81,11 +65,11 @@ let subMenuStyle = reactive({
   top: '0'
 })
 
-function show(menu: ContextMenu[], x: number, y: number) {
+function show(menu: ContextMenu, x: number, y: number) {
   contextMenu.value = menu;
   //@ts-ignore
   showMenuRef.value = true;
-  showSubMenuRef.value=false;
+  showSubMenuRef.value = false;
   console.log(x, y);
   mainMenuStyle.left = x + 2 + "px";
   mainMenuStyle.top = y + 2 + "px";
@@ -109,6 +93,7 @@ function computedMainMenuPosition(x: number, y: number) {
 function hide() {
   //@ts-ignore
   showMenuRef.value = false;
+  showSubMenuRef.value = false;
 }
 
 
@@ -124,19 +109,18 @@ window.addEventListener("mousedown", (evt: MouseEvent) => {
   hide();
 })
 
-function showSubMenu(event: MouseEvent, sub = true) {
-  if (!sub) {
-    if (showSubMenuRef.value == true) {
-      console.log("close showSubMenuRef")
-      let count=showSubMenuCount;
-      setTimeout(() => {
-        if (count == showSubMenuCount) {
-          showSubMenuRef.value = false;
-        }
-      }, 500)
-    }
+
+function showSubMenu(event: MouseEvent, menu: Menu) {
+  let subMenu = menu.subMenu;
+  if (menu.enable == false) {
+    return;
+  }
+  if (!(subMenu && subMenu.length > 0)) {
+    showSubMenuRef.value = false;
     return
   }
+  subMenu = subMenu as SubMenu[];
+  contextSubMenu.value = subMenu;
   showSubMenuRef.value = true;
   showSubMenuCount++;
   let target = event.target as HTMLDivElement;
@@ -165,7 +149,15 @@ function showSubMenu(event: MouseEvent, sub = true) {
   })
 }
 
-function clickMenuItem(menu: Menu) {
+function clickMenuItem(menu: SubMenu) {
+  hide()
+  if (menu.click) {
+    menu.click();
+  }
+}
+
+function clickMenuGroupItem(menu: GroupMenu) {
+  hide()
   if (menu.click) {
     menu.click();
   }
@@ -176,11 +168,8 @@ menuContent.contentMenu.hide = hide;
 
 </script>
 <style scoped>
-
-</style>
-<style>
 .menu-base {
-  border-radius: 5px;
+  border-radius: 8px;
   user-select: none;
   background-color: white;
   min-width: 150px;
@@ -192,18 +181,16 @@ menuContent.contentMenu.hide = hide;
   box-shadow: 3px 3px 20px 3px #c2c2c7;
 }
 
-.sub-contextMenu-root {
-  left: 600px;
+.menu-base img {
+  width: 20px;
+  height: 20px;
 }
+
 
 .menu-group {
   display: flex;
   align-items: center;
   margin-left: 3px;
-}
-
-.menu-item {
-  margin: 3px;
 }
 
 .menu-group-item {
@@ -217,23 +204,31 @@ menuContent.contentMenu.hide = hide;
 }
 
 .menu-group-item:first-child {
-  margin-left: 0px;
+  margin-left: 2px;
 }
 
 .menu-group-item:hover {
   background-color: #e3e0e0;
 }
 
-.menu-item:hover {
+.menu-item-hover:hover {
   background-color: #e3e0e0;
 }
 
 .menu-item {
+  margin: 3px;
   padding: 5px;
   border-radius: 5px;
   font-size: 12px;
   display: flex;
   justify-content: space-between;
+  align-items: center;
+}
+
+.menu-item img {
+  width: 10px;
+  height: 10px;
+  transform: rotate(-90deg);
 }
 
 .contextMenu-root {
@@ -245,5 +240,9 @@ menuContent.contentMenu.hide = hide;
   background-color: #c2c2c7;
   margin-top: 3px;
   margin-bottom: 3px;
+}
+
+.disabled {
+  opacity: 0.5; /* 半透明 */
 }
 </style>

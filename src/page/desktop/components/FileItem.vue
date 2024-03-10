@@ -10,7 +10,7 @@
         </div>
         <textarea v-else v-model="fileNameTextareaValue" @focusout="overInput" @keydown.enter="overInput" @input="input"
                   ref="textarea" class="textarea">
-      </textarea>
+        </textarea>
       </template>
     </div>
 </template>
@@ -99,7 +99,9 @@ function editFileName() {
 
 .textarea {
   width: 100%;
-  position: absolute;
+  position: relative;
+  left: 0;
+  top:0;
   resize: none;
   outline: none;
   border: 1px solid black;
