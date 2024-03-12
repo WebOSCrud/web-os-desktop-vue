@@ -1,5 +1,5 @@
 import {ref} from "vue";
-import {FileVoType} from "../../js/type/type.ts";
+import {FileVoType} from "../../../js/type/type.ts";
 import nav from "./nav.ts";
 
 

@@ -6,6 +6,7 @@ import {FileVoType} from "./type/type.ts";
 import windowManger from "../page/desktop/window/windowManger.ts";
 import wapId from "./wapId.ts";
 import VoToType from "../js/type/voToType.ts"
+import fileTypes from "./fileTypes.ts";
 
 let wapIdUrl = "/" + wapId;
 
@@ -64,24 +65,47 @@ function creatFileMenu(fileVo: FileVoType): ContextMenu {
         group: [{
             icon: wapIdUrl + "/filemanager/file/svg/cut.svg",
             tip: "剪切",
+            click() {
+                osApi.fileClipboard().setData('cut', {
+                    filePaths: [fileVo.file.path]
+                })
+            },
         }, {
             icon: wapIdUrl + "/filemanager/file/svg/copy.svg",
             tip: "复制",
+            click() {
+                let fileClipboard = osApi.fileClipboard();
+                fileClipboard.setData('copy', {
+                    filePaths: [fileVo.file.path]
+                })
+            },
         }, {
             icon: wapIdUrl + "/filemanager/file/svg/rename.svg",
             tip: "重命名",
+            click() {
+                fileVo.rename = true;
+            },
         },
             {
                 icon: wapIdUrl + "/filemanager/file/svg/delete.svg",
                 tip: "删除",
                 click() {
+                    let data = osApi.fileClipboard().data;
+                    if (data != null) {
+                        for (let i = 0; i < data.filePaths.length; i++) {
+                            if (data.filePaths[i] === fileVo.file.path) {
+                                osApi.fileClipboard().clear();
+                                break
+                            }
+                        }
+                    }
                     deleteFile(fileVo);
                 },
             }],
         menus: [
             {
                 label: "打开",
-                icon: api.file.scrUrl.fileIcon(fileVo.file.path),
+                icon: fileTypes.getFileType(fileVo.file.extName)?.openWindowIcon,
                 click() {
                     osApi.openFile(fileVo.file.path)
                 },
@@ -109,6 +133,9 @@ function creatFileMenu(fileVo: FileVoType): ContextMenu {
             },
             {
                 label: "下载",
+                click() {
+
+                },
             },
         ]
     }
@@ -116,7 +143,11 @@ function creatFileMenu(fileVo: FileVoType): ContextMenu {
 
 function creatDirMenu(fileVo: FileVoType, menuCallback: DirMenuCallback, desktop = false, dirOut = false): ContextMenu {
     return {
-        group: [],
+        group: [{
+            icon: wapIdUrl + "/filemanager/file/svg/paste.svg",
+            tip: "粘贴",
+            show: osApi.fileClipboard().type != null
+        },],
         menus: [
             {
                 label: "刷新",

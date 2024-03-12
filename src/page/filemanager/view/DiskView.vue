@@ -9,8 +9,8 @@ import {ref} from "vue";
 import {DiskVo} from "../js/vos.ts";
 import axiosUtil from "../../../js/utile/axiosUtil.ts";
 import {ResponseBody} from "../../../js/vo/vos.ts";
-import nav from "../nav.ts";
-import footer from "../footer.ts";
+import nav from "../js/nav.ts";
+import footer from "../js/footer.ts";
 import osApi from "../../../../../web-os-js-api/src";
 import wapId from "../../../js/wapId.ts";
 let diskVos = ref<DiskVo[]>([]);
@@ -29,6 +29,7 @@ function openDisk(disk:DiskVo){
   osApi.currentWindow().title=disk.name
   osApi.currentWindow().icon="/"+wapId+"/disk-sm.png"
 }
+
 
 </script>
 <style scoped>

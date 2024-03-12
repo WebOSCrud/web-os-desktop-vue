@@ -35,8 +35,8 @@
 
 
 import {computed, ref} from "vue";
-import nav from "../nav.ts";
-import fileSelector from "../fileSelector.ts";
+import nav from "../js/nav.ts";
+import fileSelector from "../js/fileSelector.ts";
 import osApi, {ClipboardType, FileClipboard} from "web-os-api"
 
 let clipboardDataRef = ref<{ filePath: string } | null>();

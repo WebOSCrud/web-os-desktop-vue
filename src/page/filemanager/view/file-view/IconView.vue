@@ -1,6 +1,6 @@
 <template>
   <div class="icon-view-root">
-    <FileItem @dblclick="openFile(item)" @click="selectFile(item,index)"
+    <FileItem @contextmenu="openMenu(item,$event)" @dblclick="openFile(item)" @click="selectFile(item,index)"
               :class="{'file-item':true,'file-item-select':item.select}"
               :file-type="item" v-for="(item,index) in files"></FileItem>
   </div>
@@ -9,12 +9,14 @@
 import {onMounted, onUnmounted, ref} from "vue";
 import {FileVoType} from "../../../../js/type/type.ts";
 import FileItem from "../../../desktop/components/FileItem.vue";
-import nav, {PathNav} from "../../nav.ts";
+import nav, {PathNav} from "../../js/nav.ts";
 import axiosUtil from "../../../../js/utile/axiosUtil.ts";
 import {FileVo, ResponseBody} from "../../../../js/vo/vos.ts";
 import voToType from "../../../../js/type/voToType.ts";
-import footer from "../../footer.ts";
-import fileSelector from "../../fileSelector.ts";
+import footer from "../../js/footer.ts";
+import fileSelector from "../../js/fileSelector.ts";
+import osApi from "web-os-api"
+import fileMenu from "../../../../js/fileMenu.ts";
 
 let files = ref<FileVoType[]>([]);
 
@@ -32,15 +34,32 @@ function pathNavChange(pathNav: PathNav) {
   })
 }
 
+function openMenu(file: FileVoType, e: MouseEvent) {
+  let contextMenu = fileMenu.creatFileMenu(file);
+  if(file.file.dir){
+    for (let i = 0; i < contextMenu.menus.length; i++) {
+      if (contextMenu.menus[i].label === "打开") {
+        contextMenu.menus[i].click=()=>{
+          nav.pushPathNav({name: file.file.name, path: file.file.path})
+        }
+        break
+      }
+    }
+  }
+  osApi.showMenu(contextMenu, e);
+}
+
 function openFile(file: FileVoType) {
   if (file.file.dir) {
     nav.pushPathNav({name: file.file.name, path: file.file.path})
   }
 }
-function selectFile(file:FileVoType,index:number){
+
+function selectFile(file: FileVoType, index: number) {
   fileSelector.setSelectFile([file]);
   console.log(index);
 }
+
 onMounted(() => {
   pathNavChange(nav.pathNavRef.value[nav.pathNavRef.value.length - 1])
   nav.addEventListener(pathNavChange);
@@ -67,9 +86,11 @@ onUnmounted(() => {
 .icon-view-root >>> .file-name {
   color: black;
 }
-.file-item-select{
+
+.file-item-select {
   background-color: rgba(70, 160, 252, 0.3);
 }
+
 .file-item:hover {
   background-color: rgba(70, 160, 252, 0.3);
 }

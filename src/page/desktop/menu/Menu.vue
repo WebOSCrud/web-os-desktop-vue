@@ -4,10 +4,14 @@
          class="menu-base contextMenu-root">
       <!--      <div style="height: 7px"></div>-->
       <div class="menu-group" v-if="contextMenu.group.length>0">
-        <div @click="clickMenuGroupItem(groupItem)" v-for="groupItem in contextMenu.group" class="menu-group-item"
-             :title="groupItem.tip">
-          <img :src="groupItem.icon">
-        </div>
+        <template v-for="groupItem in contextMenu.group">
+          <div @click="clickMenuGroupItem(groupItem)"
+               class="menu-group-item"
+               v-if="groupItem.show!==false"
+               :title="groupItem.tip">
+            <img :src="groupItem.icon">
+          </div>
+        </template>
       </div>
       <template v-for="menu in contextMenu.menus">
         <div class="menu-divider" v-if="menu.divider==true"></div>
@@ -16,7 +20,7 @@
         'menu-item-hover':menu.enable!==false
         }" @click="clickMenuItem(menu)" @mouseenter="showSubMenu($event,menu)" v-else-if="menu.show!==false">
           <Label :icon-size="20" :textSpace="10" :icon="menu.icon"
-                 >{{ menu.label }}</Label>
+          >{{ menu.label }}</Label>
           <img style="" v-if="menu.subMenu && menu.subMenu.length>0"
                src="/filemanager/min-arrow.svg">
         </div>

@@ -1,16 +1,17 @@
 <template>
   <div class="path-tool-div">
     <div class="path-nav">
-      <div class="nav">
+      <div @click="backward" :class="{'nav':true,'nav-arrow-active':pathDoNavIndexRef >= 0}">
         <img src="/filemanager/arrow-left-active.png" height="18" width="18"/>
       </div>
-      <div class="nav">
+      <div @click="forward"
+           :class="{'nav':true,'nav-arrow-active': pathDoNavIndexRef+1 < pathDoNavRef.length}">
         <img src="/filemanager/arrow-right-active.png" height="18" width="18"/>
       </div>
-      <div class="nav">
-        <img src="/filemanager/arrow-right-active.png" height="18" width="18"/>
+      <div  @click="uplevel" :class="{'nav':true,'nav-arrow-active':pathNavRef.length>0}">
+        <img src="/filemanager/arrow-up-active.png" height="18" width="18"/>
       </div>
-      <div class="nav">
+      <div  @click="refresh" :class="{'nav':true,'nav-arrow-active':true}">
         <img src="/filemanager/refresh.png" height="18" width="18"/>
       </div>
     </div>
@@ -20,7 +21,7 @@
     </div>
     <div v-show="!showPathInput" ref="pathInputDiv" @click.self="inputPath" class="path-input">
       <div ref="navItemDiv" @click.self="inputPath" class="nav-item-div" :style="navItemStyle">
-        <template v-for="navPath in navPaths">
+        <template v-for="navPath in pathNavRef">
           <div class="nav-item">
             >
           </div>
@@ -38,20 +39,32 @@
 </template>
 <script setup lang="ts">
 import {nextTick, onMounted, ref} from "vue";
-import nav, {PathNav} from "../nav.ts"
+import nav, {PathNav} from "../js/nav.ts"
 import axiosUtil from "../../../js/utile/axiosUtil.ts";
 import {ResponseBody} from "../../../js/vo/vos.ts";
 
 let pathInputDiv = ref<HTMLDivElement>();
 let navItemDiv = ref<HTMLDivElement>();
 let showPathInput = ref(false);
-let navPaths = nav.pathNavRef;
+let pathNavRef = nav.pathNavRef;
 let pathInputValue = ref("");
 let navItemStyle = ref({
   left: 0 + 'px',
 })
 
 let pathInput = ref<HTMLDivElement>();
+let pathDoNavIndexRef = nav.pathDoNavIndexRef;
+let pathDoNavRef = nav.pathDoNavRef;
+
+
+let backward = nav.backward;
+let forward = nav.forward;
+let uplevel = nav.uplevel;
+
+
+function refresh(){
+
+}
 
 function inputPath() {
   showPathInput.value = true;
@@ -92,12 +105,12 @@ function clickPathNav(pathNav: PathNav) {
     return
   }
   let newPathNav = [];
-  for (let i = 0; i < navPaths.value.length; i++) {
-    if (navPaths.value[i] == pathNav) {
-      newPathNav.push(navPaths.value[i])
+  for (let i = 0; i < pathNavRef.value.length; i++) {
+    if (pathNavRef.value[i] == pathNav) {
+      newPathNav.push(pathNavRef.value[i])
       break
     }
-    newPathNav.push(navPaths.value[i])
+    newPathNav.push(pathNavRef.value[i])
   }
   nav.setPathNav(newPathNav);
 }
@@ -106,8 +119,8 @@ window.addEventListener("resize", checkNavItemDiv)
 
 onMounted(() => {
   checkNavItemDiv();
-  nav.addEventListener(()=>{
-    nextTick(()=>{
+  nav.addEventListener(() => {
+    nextTick(() => {
       checkNavItemDiv();
     })
   })
@@ -128,9 +141,14 @@ onMounted(() => {
   justify-content: center;
   align-items: center;
   margin-left: 5px;
+  opacity: 0.3;
 }
 
-.nav:hover {
+.nav-arrow-active {
+  opacity: 1;
+}
+
+.nav-arrow-active:hover {
   background-color: #e3e0e0;
 }
 

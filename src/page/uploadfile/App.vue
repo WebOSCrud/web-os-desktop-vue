@@ -31,9 +31,6 @@ onMounted(() => {
     headers: {
       'Content-Type': 'multipart/form-data',
     },
-    transformRequest: [function (data) {
-      return data
-    }],
     onUploadProgress(progressEvent: AxiosProgressEvent) {
       let total = progressEvent.total as number;
       let persent = (progressEvent.loaded / total * 100 | 0)		//上传进度百分比
@@ -54,7 +51,7 @@ onMounted(() => {
   }).catch((err: AxiosError) => {
     console.log(err)
     close = true;
-    osApi.messageBox({type: 'error', msg: err.message})
+    osApi.messageBox({type: 'error', msg: err.message+"<br>上传失败检查上传文件限制大小"})
     osApi.currentWindow().close();
   })
 })

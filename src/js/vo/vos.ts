@@ -7,6 +7,7 @@ export interface FileVo{
     lastModifiedTime:number,
     prentPath:string
     hidde:boolean
+    extName:string
 }
 
 export interface ResponseBody<T>{

@@ -20,8 +20,8 @@ import FileTool from "./view/FileTool.vue";
 import PathTool from "./view/PathTool.vue";
 import MainView from "./view/MainView.vue";
 import osApi, {api} from "web-os-api"
-import footer from "./footer.ts";
-import nav, {PathNav} from "./nav.ts";
+import footer from "./js/footer.ts";
+import nav, {PathNav} from "./js/nav.ts";
 import wapId from "../../js/wapId.ts";
 
 
