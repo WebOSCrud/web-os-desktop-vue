@@ -1,8 +1,10 @@
 <template>
   <div class="icon-view-root">
-    <FileItem @contextmenu="openMenu(item,$event)" @dblclick="openFile(item)" @click="selectFile(item,index)"
-              :class="{'file-item':true,'file-item-select':item.select}"
-              :file-type="item" v-for="(item,index) in files"></FileItem>
+    <template v-for="(item,index) in files">
+      <FileItem @contextmenu="openMenu(item,$event)" @dblclick="openFile(item)" @click="selectFile(item,index)"
+                :class="{'file-item':true,'file-item-select':item.select}"
+                :file-type="item" v-if="!item.delete"></FileItem>
+    </template>
   </div>
 </template>
 <script setup lang="ts">
@@ -36,10 +38,10 @@ function pathNavChange(pathNav: PathNav) {
 
 function openMenu(file: FileVoType, e: MouseEvent) {
   let contextMenu = fileMenu.creatFileMenu(file);
-  if(file.file.dir){
+  if (file.file.dir) {
     for (let i = 0; i < contextMenu.menus.length; i++) {
       if (contextMenu.menus[i].label === "打开") {
-        contextMenu.menus[i].click=()=>{
+        contextMenu.menus[i].click = () => {
           nav.pushPathNav({name: file.file.name, path: file.file.path})
         }
         break

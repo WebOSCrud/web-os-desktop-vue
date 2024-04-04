@@ -21,7 +21,7 @@ import {ResponseBody} from "../../../js/vo/vos.ts";
 import {DiskVo} from "../js/vos.ts";
 import {ref} from "vue";
 import IconView from "./file-view/IconView.vue";
-import nav, {PathNav} from "../js/nav.ts";
+import nav, {} from "../js/nav.ts";
 import footer from "../js/footer.ts";
 import osApi from "web-os-api"
 import wapId from "../../../js/wapId.ts";
